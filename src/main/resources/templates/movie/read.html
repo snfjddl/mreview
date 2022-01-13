@@ -56,8 +56,8 @@
 
         <div class="uploadResult">
             <ul>
-                <li th:each="movieImage: ${dto.imageDTOList}" >
-                    <img th:if="${movieImage != null}"
+                <li th:each="movieImage: ${dto.imageDTOList}" th:data-file="${movieImage.getThumbnailURL()}">
+                    <img th:if="${movieImage.path != null}"
                          th:src="|/display?fileName=${movieImage.getThumbnailURL()}|">
                 </li>
             </ul>
@@ -66,6 +66,13 @@
         <button type="button" class="btn btn-primary">
             Review Count <span class="badge badge-light">[[${dto.reviewCount}]]</span>
         </button>
+        <button type="button" class="btn btn-info addReviewBtn">
+            Review Register
+        </button>
+
+        <div class="list-group reviewList">
+
+        </div>
 
         <!-- 리뷰 모달 -->
         <div class="reviewModal modal" tabindex="-1" role="dialog">
@@ -105,7 +112,7 @@
         </div>
 
         <!-- 이미지 확대 모달 -->
-        <div class="modal" tabindex="-2" role="dialog">
+        <div class="modal imageModal" tabindex="-2" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -140,7 +147,149 @@
                     }
                 });
 
-                $('.reviewModal').modal('show');
+                var reviewModal = $('.reviewModal');
+                var inputMid = $('input[name="mid"]');
+                var inputText = $('input[name="text"]');
+
+                $('.addReviewBtn').click(function(e) {
+                    inputMid.val("");
+                    inputText.val("");
+
+                    $('.removeBtn, .modifyBtn').hide();
+                    $('.reviewSaveBtn').show();
+
+                    reviewModal.modal('show');
+                });
+
+                $('.reviewSaveBtn').click(function(e) {
+
+                    var data = {mno:mno, grade:grade, text:inputText.val(), mid:inputMid.val()};
+                    console.log(data);
+
+                    $.ajax({
+                        url: '/reviews/' + mno,
+                        type: 'POST',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'text',
+                        success: function(result) {
+                            console.log("result: " + result);
+
+                            self.location.reload();
+                        }
+                    }); // end Ajax
+
+                    reviewModal.modal('hide');
+                }); // end reviewSave
+
+                $('.modifyBtn').click(function(e) {
+
+                    var data = {reviewnum:reviewnum, mno:mno, grade:grade, text:inputText.val(), mid:inputMid.val()};
+                    console.log(data);
+
+                    $.ajax({
+                        url: '/reviews/' + mno + '/' + reviewnum,
+                        type: 'PUT',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'text',
+                        success: function(result) {
+                            console.log("result: " + result);
+
+                            self.location.reload();
+                        }
+                    }); // end Ajax
+
+                    reviewModal.modal('hide');
+                }); // end reviewModify
+
+                $('.removeBtn').click(function(e) {
+
+                    var data = {reviewnum:reviewnum};
+                    console.log(data);
+                    console.log(data.reviewnum);
+
+                    $.ajax({
+                        url: '/reviews/' + mno + '/' + data.reviewnum,
+                        type: 'DELETE',
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: 'text',
+                        success: function(result) {
+                            console.log("result: " + result);
+
+                            self.location.reload();
+                        }
+                    }); // end Ajax
+
+                    reviewModal.modal('hide');
+                }); // end reviewRemove
+
+                // page 로딩 시 리뷰 바로 가져오기
+                function getMovieReviews() {
+                    function formatTime(str) {
+                        var date = new Date(str);
+
+                        return date.getFullYear() + '/' +
+                            (date.getMonth() + 1) + '/' +
+                            date.getDate() + ' ' +
+                            date.getHours() + ':' +
+                            date.getMinutes();
+                    }
+
+                    $.getJSON('/reviews/'+mno+'/all', function(arr) {
+                        var str = "";
+
+                        $.each(arr, function(idx, review) {
+                            console.log(review);
+
+                            str += '<div class="card-body" data-reviewnum=' + review.reviewnum +
+                                    ' data-mid=' + review.mid+'>';
+                            str += '<h5 class="card-title">' + review.text + ' <span>' +
+                                    review.grade + '</span></h5>';
+                            str += '<h6 class="card-subtitle mb-2 text-muted">' + review.nickname + '</h6>';
+                            str += '<p class="card-text">' + formatTime(review.regDate) + '</p>';
+                            str += '</div>';
+                        });
+
+                        $('.reviewList').html(str);
+                    });
+                }
+
+                getMovieReviews();
+
+                // modify review
+                var reviewnum;
+
+                $('.reviewList').on('click', '.card-body', function() {
+
+                    $('.reviewSaveBtn').hide();
+                    $('.removeBtn, .modifyBtn').show();
+
+                    var targetReview = $(this);
+
+                    reviewnum = targetReview.data('reviewnum');
+                    inputMid.val(targetReview.data('mid'));
+                    inputText.val(targetReview.find('.card-title').clone().children().remove().end().text());
+
+                    console.log(targetReview.find('.card-title span'));
+                    var grade = targetReview.find('.card-title span').html();
+                    $('.starrr a:nth-child(' + grade + ')').trigger('click');
+
+                    $('.reviewModal').modal('show');
+                });
+
+                // 영화 게시글 클릭 시 이미지 확대
+                $('.uploadResult li').click(function() {
+
+                    var file = $(this).data('file');
+                    console.log(file);
+
+                    $('.imageModal .modal-body').html("<img style='width:100%' src='/display?fileName=" + file + "&size=1' >");
+
+                    $('.imageModal').modal('show');
+
+                });
+
             });
         </script>
 
