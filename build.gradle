@@ -39,6 +39,11 @@ dependencies {
 	implementation 'com.querydsl:querydsl-jpa'
 	//querydsl 추가
 	implementation 'com.querydsl:querydsl-apt'
+
+	// Thumbnailator 추가
+	// https://github.com/coobird/thumbnailator
+	implementation 'net.coobird:thumbnailator:0.4.14'
+
 }
 
 test {
