@@ -70,6 +70,14 @@
             Review Register
         </button>
 
+        <a th:href="@{/movie/modify(mno= ${dto.mno}, page= ${requestDTO.page})}">
+            <button type="button" class="btn btn-primary">Modify</button>
+        </a>
+        <a th:href="@{/movie/list(mno= ${dto.mno}, page= ${requestDTO.page})}">
+            <button type="button" class="btn btn-primary">List</button>
+        </a>
+
+
         <div class="list-group reviewList">
 
         </div>

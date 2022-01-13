@@ -16,9 +16,13 @@ public interface MovieService {
 
     Long register(MovieDTO movieDTO);
 
-    PageResultDTO<MovieDTO, Object[]> getList(PageRequestDTO requestDTO);
-
     MovieDTO getMovie(Long mno);
+
+    void remove(Long mno);
+
+    void modify(MovieDTO movieDTO);
+
+    PageResultDTO<MovieDTO, Object[]> getList(PageRequestDTO requestDTO);
 
     default MovieDTO entitiesToDTO(Movie movie, List<MovieImage> movieImageList, Double avg, Long reviewCount) {
         MovieDTO movieDTO = MovieDTO.builder()

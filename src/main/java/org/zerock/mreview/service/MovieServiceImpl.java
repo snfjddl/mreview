@@ -14,11 +14,9 @@ import org.zerock.mreview.entity.Movie;
 import org.zerock.mreview.entity.MovieImage;
 import org.zerock.mreview.repository.MovieImageRepository;
 import org.zerock.mreview.repository.MovieRepository;
+import org.zerock.mreview.repository.ReviewRepository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -29,6 +27,8 @@ public class MovieServiceImpl implements MovieService{
     private final MovieRepository movieRepository;
 
     private final MovieImageRepository movieImageRepository;
+
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     @Override
@@ -85,4 +85,32 @@ public class MovieServiceImpl implements MovieService{
         return entitiesToDTO(movie, movieImageList, avg, reviewCount);
     }
 
+    @Transactional
+    @Override
+    public void remove(Long mno) {
+
+        Optional<Movie> result = movieRepository.findById(mno);
+
+        if (result.isPresent()) {
+            Movie movie = result.get();
+            reviewRepository.deleteByMovie(movie);
+            movieImageRepository.deleteByMovie(movie);
+            movieRepository.delete(movie);
+        }
+    }
+
+    @Override
+    public void modify(MovieDTO movieDTO) {
+
+        Optional<Movie> result = movieRepository.findById(movieDTO.getMno());
+
+        if(result.isPresent()) {
+
+            Movie movie = result.get();
+
+            movie.changeTitle(movieDTO.getTitle());
+
+            movieRepository.save(movie);
+        }
+    }
 }
