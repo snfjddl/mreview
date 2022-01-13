@@ -7,6 +7,7 @@ import org.zerock.mreview.entity.Member;
 import org.zerock.mreview.entity.Movie;
 import org.zerock.mreview.entity.Review;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -35,5 +36,15 @@ public class ReviewRepositoryTests {
             reviewRepository.save(review);
         });
 
+    }
+
+    @Test
+    public void getReviewsByMovie() {
+
+        Movie movie = Movie.builder().mno(98L).build();
+
+        List<Review> result = reviewRepository.findByMovie(movie);
+
+        System.out.println(result);
     }
 }
