@@ -42,7 +42,9 @@ public class ReviewServiceImpl implements ReviewService{
     @Override
     public void modify(ReviewDTO movieReviewDTO) {
 
-        Optional<Review> entity = reviewRepository.findById(movieReviewDTO.getMno());
+        log.info("ReviewDTO: "+movieReviewDTO);
+
+        Optional<Review> entity = reviewRepository.findById(movieReviewDTO.getReviewnum());
 
         if (entity.isPresent()) {
 

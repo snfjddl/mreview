@@ -190,14 +190,14 @@
                     reviewModal.modal('hide');
                 }); // end reviewSave
 
-                $('.modifyBtn').click(function(e) {
+                $('.modifyBtn').on('click', function(e) {
 
                     var data = {reviewnum:reviewnum, mno:mno, grade:grade, text:inputText.val(), mid:inputMid.val()};
                     console.log(data);
 
                     $.ajax({
                         url: '/reviews/' + mno + '/' + reviewnum,
-                        type: 'PUT',
+                        type: 'POST',
                         data: JSON.stringify(data),
                         contentType: 'application/json; charset=utf-8',
                         dataType: 'text',

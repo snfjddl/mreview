@@ -1,5 +1,7 @@
 package org.zerock.mreview.service;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import org.zerock.mreview.dto.PageRequestDTO;
 import org.zerock.mreview.dto.PageResultDTO;
 import org.zerock.mreview.entity.Movie;
 import org.zerock.mreview.entity.MovieImage;
+import org.zerock.mreview.entity.QMovie;
 import org.zerock.mreview.repository.MovieImageRepository;
 import org.zerock.mreview.repository.MovieRepository;
 import org.zerock.mreview.repository.ReviewRepository;
@@ -53,14 +56,31 @@ public class MovieServiceImpl implements MovieService{
 
         Pageable pageable = requestDTO.getPageable(Sort.by("mno").descending());
 
-        Page<Object[]> result = movieRepository.getListPage(pageable);
+//        Double avg = 0D;
+        String title = "";
+        String type = requestDTO.getType();
 
-        Function<Object[], MovieDTO> fn = (arr -> entitiesToDTO(
-                (Movie) arr[0],
-                (Arrays.asList((MovieImage)arr[1])),
-                (Double) arr[2],
-                (Long) arr[3]
-        ));
+        log.info("requestDTO: " + requestDTO);
+
+        if (type == null || type.trim().length() == 0) {
+            // ignore
+        }
+        else if (type.contains("t")) {
+            title = requestDTO.getKeyword();
+        }
+//        else if (type.contains("a")) {
+//            avg = Double.parseDouble(requestDTO.getKeyword());
+//        }
+
+        Page<Object[]> result = movieRepository.getSearchListPage(title, pageable);
+
+        Function<Object[], MovieDTO> fn = (arr ->
+                entitiesToDTO(
+                    (Movie) arr[0],
+                    (Arrays.asList((MovieImage)arr[1])),
+                    (Double) arr[2],
+                    (Long) arr[3])
+        );
 
         return new PageResultDTO<>(result, fn);
     }
@@ -113,4 +133,5 @@ public class MovieServiceImpl implements MovieService{
             movieRepository.save(movie);
         }
     }
+
 }
